@@ -1,0 +1,7 @@
+config:
+  # Line length: disabled — wrapping is left as written (Prettier's default
+  # proseWrap: preserve), not enforced by a hard character limit.
+  MD013: false
+
+  MD007:
+    indent: 2

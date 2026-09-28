@@ -1,0 +1,148 @@
+{
+  "name": "arthurc0102",
+  "owner": {
+    "name": "Arthur Chang"
+  },
+  "description": "My personal agent marketplace: self-authored and curated third-party skills & plugins for AI coding agents.",
+  "plugins": [
+    {
+      "name": "ty-lsp",
+      "source": "./plugins/ty-lsp",
+      "description": "Python language server (ty) for type checking and code intelligence, run through uvx.",
+      "category": "development"
+    },
+    {
+      "name": "typescript-lsp",
+      "source": "./plugins/typescript-lsp",
+      "description": "TypeScript/JavaScript language server that follows the workspace's TypeScript version: the native tsc --lsp for TypeScript 7+, typescript-language-server for older versions.",
+      "category": "development"
+    },
+    {
+      "name": "i-have-adhd",
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      },
+      "description": "Shape Claude Code output for an ADHD reader: lead with the next action, number steps, suppress tangents, restate state, make wins visible.",
+      "author": {
+        "name": "Ayoub G.",
+        "url": "https://github.com/ayghri"
+      },
+      "homepage": "https://github.com/ayghri/i-have-adhd",
+      "category": "productivity"
+    },
+    {
+      "name": "eli5",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-community.git",
+        "path": "eli5"
+      },
+      "description": "Explain any topic like I'm 5: a dead-simple HTML picture explainer with big visuals and few words. Use /eli5 <topic>.",
+      "author": {
+        "name": "Thariq Shihipar"
+      },
+      "homepage": "https://github.com/anthropics/claude-plugins-community/tree/main/eli5",
+      "category": "learning"
+    },
+    {
+      "name": "codex",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/openai/codex-plugin-cc.git",
+        "path": "plugins/codex"
+      },
+      "description": "Use Codex from Claude Code to review code or delegate tasks.",
+      "author": {
+        "name": "OpenAI"
+      },
+      "homepage": "https://github.com/openai/codex-plugin-cc"
+    },
+    {
+      "name": "humanizer",
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
+      },
+      "description": "Rewrite AI-sounding text so it reads naturally without changing what it says.",
+      "author": {
+        "name": "blader",
+        "url": "https://github.com/blader"
+      },
+      "homepage": "https://github.com/blader/humanizer"
+    },
+    {
+      "name": "shuorenhua-zh-tw",
+      "source": {
+        "source": "github",
+        "repo": "tentenco/shuorenhua-zh-tw"
+      },
+      "description": "Clean AI-sounding patterns out of Traditional Chinese (Taiwan) text: remove AI tone, fix Mainland/Hong Kong terms and simplified-to-traditional conversion errors, and follow Taiwan punctuation and publishing conventions.",
+      "author": {
+        "name": "tentenco",
+        "url": "https://github.com/tentenco"
+      },
+      "homepage": "https://github.com/tentenco/shuorenhua-zh-tw",
+      "skills": ["./"]
+    },
+    {
+      "name": "frontend-design",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-official.git",
+        "path": "plugins/frontend-design"
+      },
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Generates creative, polished code that avoids generic AI aesthetics.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "homepage": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design",
+      "category": "development"
+    },
+    {
+      "name": "context7",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-official.git",
+        "path": "external_plugins/context7"
+      },
+      "description": "Upstash Context7 MCP server for up-to-date documentation lookup. Connects to Context7's hosted remote MCP server (https://mcp.context7.com/mcp) — no local Node.js or npx required — to pull version-specific documentation and code examples directly from source repositories into your LLM context. Works anonymously out of the box; set CONTEXT7_API_KEY for higher rate limits.",
+      "author": {
+        "name": "Upstash"
+      },
+      "homepage": "https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins/context7",
+      "category": "development"
+    },
+    {
+      "name": "feature-dev",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-official.git",
+        "path": "plugins/feature-dev"
+      },
+      "description": "Comprehensive feature development workflow with specialized agents for codebase exploration, architecture design, and quality review",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "homepage": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev",
+      "category": "development"
+    },
+    {
+      "name": "playground",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-official.git",
+        "path": "plugins/playground"
+      },
+      "description": "Creates interactive HTML playgrounds — self-contained single-file explorers with visual controls, live preview, and prompt output with copy button. Includes templates for design playgrounds, data explorers, concept maps, and document critique.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "homepage": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playground",
+      "category": "development"
+    }
+  ]
+}

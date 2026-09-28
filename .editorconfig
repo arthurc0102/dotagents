@@ -1,0 +1,18 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown: trailing spaces are meaningful (a hard line break).
+#
+# Indent width is unset because markdown has none: a continuation lines up
+# under its list marker, so it is two spaces after `- ` and three after `1. `.
+# markdownlint already enforces that, with rules that know what a list is.
+[*.md]
+trim_trailing_whitespace = false
+indent_size = unset

@@ -1,0 +1,92 @@
+default_stages:
+  - pre-commit
+
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+
+# Hooks for tools in package.json override `language: system` and `entry`, so
+# the upstream repo supplies the hook definition -- which files it runs on,
+# which flags it needs -- while the tool itself is the one this project already
+# installs.
+#
+# For those hooks `rev` pins the definition, NOT the tool version. Bumping it
+# picks up changes to how a hook should be invoked; the tool's own version
+# lives in package-lock.json. The remaining hooks have no npm counterpart here,
+# so they keep their upstream `language` and prek installs them per-hook, where
+# `rev` does pin the tool. `prek update` refreshes every rev.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-aws-credentials
+        args:
+          - --allow-missing-credentials
+
+      - id: detect-private-key
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+
+  # Enforces .editorconfig itself. It stands in for end-of-file-fixer, which
+  # opens every file `rb+` whether or not it needs fixing and so cannot run
+  # where a path is read-only, and it checks the indentation the formatters
+  # produce against what .editorconfig declares -- the mismatch that otherwise
+  # goes unnoticed until someone reads a file and wonders why it looks wrong.
+  # Note it counts leading spaces, so continuation lines inside a comment must
+  # also land on a multiple of the indent width.
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.11.1
+    hooks:
+      - id: editorconfig-checker
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.18.0
+    hooks:
+      - id: commitizen
+        stages:
+          - commit-msg
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
+        language: system
+        entry: npx markdownlint-cli2
+
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v10.0.1
+    hooks:
+      - id: cspell # Spell check changed files
+        language: system
+        entry: npx cspell
+
+      - id: cspell # Spell check the commit message
+        name: cspell-commit
+        language: system
+        entry: npx cspell
+        args:
+          - --no-must-find-files
+          - --no-progress
+          - --no-summary
+          - --files
+        stages:
+          - commit-msg
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx prettier --ignore-unknown --list-different --write
+        language: system

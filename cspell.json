@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "language": "en",
+  "dictionaries": [
+    "bash",
+    "git",
+    "markdown",
+    "node",
+    "npm",
+    "shell",
+    "software-terms"
+  ],
+  "useGitignore": true,
+  "enableGlobDot": true,
+  "words": [
+    "arthurc0102",
+    "dotagents",
+    "dotfiles",
+    "lsp",
+    "prek",
+    "shuorenhua",
+    "uvx"
+  ],
+  "overrides": [
+    {
+      "filename": ".claude-plugin/marketplace.json",
+      "ignoreRegExpList": ["/\"(?:name|repo)\":\\s*\"[^\"]*\"/g"]
+    },
+    {
+      "filename": "README.md",
+      "ignoreRegExpList": [
+        "/\\[[^\\]]*\\]\\(https:\\/\\/github\\.com\\/[^)]*\\)/g"
+      ]
+    }
+  ]
+}

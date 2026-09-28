@@ -1,0 +1,32 @@
+#!/bin/sh
+# Start the TypeScript language server that matches the workspace:
+# - TypeScript 7+ (native, no tsserver.js): the workspace's own `tsc --lsp`.
+# - TypeScript 6 or earlier: typescript-language-server, which drives the
+#   workspace's tsserver.js.
+# - No TypeScript installed: `tsc --lsp` from the latest TypeScript 7.
+set -eu
+
+dir="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# Resolve the workspace's typescript package the way Node would, walking up
+# from the project directory. Prints "<major> <package dir>" or nothing.
+found=$(node -e '
+  try {
+    const pkg = require.resolve("typescript/package.json", { paths: [process.argv[1]] });
+    const { version } = require(pkg);
+    console.log(version.split(".")[0], require("path").dirname(pkg));
+  } catch {}
+' "$dir")
+
+if [ -z "$found" ]; then
+  exec npx -y -p typescript@7 tsc --lsp --stdio
+fi
+
+major=${found%% *}
+package_dir=${found#* }
+
+if [ "$major" -ge 7 ]; then
+  exec node "$package_dir/bin/tsc" --lsp --stdio
+fi
+
+exec npx -y typescript-language-server --stdio
