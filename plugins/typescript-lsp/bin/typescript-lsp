@@ -1,22 +1,161 @@
 #!/bin/sh
 # Start the TypeScript language server that matches the workspace:
 # - TypeScript 7+ (native, no tsserver.js): the workspace's own `tsc --lsp`.
-# - TypeScript 6 or earlier: typescript-language-server, which drives the
+# - TypeScript 6 or earlier: typescript-language-server, pointed at the
 #   workspace's tsserver.js.
 # - No TypeScript installed: `tsc --lsp` from the latest TypeScript 7.
 set -eu
 
-dir="${CLAUDE_PROJECT_DIR:-$PWD}"
+lib="$(cd "$(dirname "$0")/../lib" && pwd -P)"
 
-# Resolve the workspace's typescript package the way Node would, walking up
-# from the project directory. Prints "<major> <package dir>" or nothing.
+# Resolve symlinks so $PWD compares equal to the path git prints.
+cd -P "${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# Search at or above the project directory only up to the git root (or only
+# the project directory outside a git repo), so an unrelated install such as
+# ~/node_modules/typescript is never picked up. A submodule's root is its
+# outermost superproject's, since that is where a monorepo keeps typescript.
+stop=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+while super=$(git -C "$stop" rev-parse --show-superproject-working-tree 2>/dev/null) &&
+  [ -n "$super" ]; do
+  stop=$super
+done
+
+# Find the workspace's typescript package and print "<major> <package dir>",
+# or nothing. Looks in node_modules at or above the project directory first,
+# then in the packages of a monorepo whose typescript is not hoisted to the
+# root: those listed by "workspaces" in package.json or by
+# pnpm-workspace.yaml. Explains on stderr when a project that declares
+# typescript gets none, since the fallback then runs a different version.
 found=$(node -e '
-  try {
-    const pkg = require.resolve("typescript/package.json", { paths: [process.argv[1]] });
-    const { version } = require(pkg);
-    console.log(version.split(".")[0], require("path").dirname(pkg));
-  } catch {}
-' "$dir")
+  const fs = require("fs");
+  const path = require("path");
+  const [start, stop] = process.argv.slice(1);
+
+  const read = (file) => {
+    try {
+      return fs.readFileSync(file, "utf8");
+    } catch {
+      return undefined;
+    }
+  };
+  const readJson = (file) => {
+    try {
+      return JSON.parse(read(file));
+    } catch {
+      return undefined;
+    }
+  };
+
+  const typescriptIn = (dir) => {
+    const pkg = path.join(dir, "node_modules", "typescript");
+    const version = readJson(path.join(pkg, "package.json"))?.version;
+    return version && { major: Number(version.split(".")[0]), dir: pkg };
+  };
+
+  const ancestors = [];
+  for (let d = start; ; d = path.dirname(d)) {
+    ancestors.push(d);
+    if (d === stop || d === path.dirname(d)) break;
+  }
+
+  // The workspace globs of the nearest monorepo root, and that root.
+  const workspaces = () => {
+    for (const d of ancestors) {
+      const declared = readJson(path.join(d, "package.json"))?.workspaces;
+      const globs = Array.isArray(declared) ? declared : declared?.packages;
+      if (Array.isArray(globs)) return { root: d, globs };
+
+      const yaml = read(path.join(d, "pnpm-workspace.yaml"))?.replace(/\r\n?/g, "\n");
+      if (yaml) {
+        // Either a flow list (packages: ["apps/*"]) or a block list of
+        // "- apps/*" lines, with comments allowed after the key and items.
+        const value = /^packages:[ \t]*(?:#.*)?(\n(?:[ \t]*(?:-.*|#.*)?(?:\n|$))*)|^packages:[ \t]*\[([^\]]*)\]/m.exec(yaml);
+        const items = value?.[2] !== undefined
+          ? value[2].replace(/#.*$/gm, "").split(",")
+          : [...(value?.[1] ?? "").matchAll(/^[ \t]*-(.*)$/gm)].map((m) => m[1].replace(/(^|[ \t])#.*$/, ""));
+        const globs = items
+          .map((s) => s.trim().replace(/^(["\x27])(.*)\1$/, "$2"))
+          .filter(Boolean);
+        return { root: d, globs };
+      }
+    }
+  };
+
+  const childDirs = (dir) => {
+    try {
+      return fs.readdirSync(dir, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && e.name !== "node_modules" && !e.name.startsWith("."))
+        .map((e) => path.join(dir, e.name));
+    } catch {
+      return [];
+    }
+  };
+  const descendants = (dir, depth) =>
+    depth ? childDirs(dir).flatMap((d) => [d, ...descendants(d, depth - 1)]) : [];
+
+  // Expand a workspace glob ("packages/*", "apps/**", "tools/cli") to the
+  // directories it names.
+  const expand = (root, glob) => {
+    let dirs = [root];
+    for (const segment of glob.split("/").filter((s) => s && s !== ".")) {
+      if (segment === "**") {
+        dirs = dirs.flatMap((d) => [d, ...descendants(d, 4)]);
+      } else if (segment.includes("*")) {
+        const escaped = segment.split("*").map((s) => s.replace(/[.+?^${}()|[\]\\]/g, "\\$&"));
+        const pattern = new RegExp(`^${escaped.join("[^/]*")}$`);
+        dirs = dirs.flatMap((d) => childDirs(d).filter((c) => pattern.test(path.basename(c))));
+      } else {
+        dirs = dirs.map((d) => path.join(d, segment));
+      }
+    }
+    return dirs;
+  };
+
+  const find = () => {
+    for (const d of ancestors) {
+      const found = typescriptIn(d);
+      if (found) return found;
+    }
+
+    const workspace = workspaces();
+    if (!workspace) return;
+    const excluded = new Set(workspace.globs
+      .filter((g) => g.startsWith("!"))
+      .flatMap((g) => expand(workspace.root, g.slice(1))));
+    const packages = new Set(workspace.globs
+      .filter((g) => !g.startsWith("!"))
+      .flatMap((g) => expand(workspace.root, g))
+      .filter((d) => !excluded.has(d)));
+    const below = [...packages].map(typescriptIn).filter(Boolean);
+    if (!below.length) return;
+
+    below.sort((a, b) => b.major - a.major);
+    const majors = [...new Set(below.map((f) => f.major))];
+    if (majors.length > 1) {
+      console.error(`typescript-lsp: workspace packages use TypeScript ${majors.join(", ")}; using ${below[0].major} from ${below[0].dir}`);
+    }
+    return below[0];
+  };
+
+  const found = find();
+  if (found) {
+    console.log(found.major, found.dir);
+    process.exit();
+  }
+
+  const pnp = ancestors.find((d) => fs.existsSync(path.join(d, ".pnp.cjs")));
+  const declared = ancestors.some((d) => {
+    const pkg = readJson(path.join(d, "package.json")) ?? {};
+    return ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]
+      .some((field) => pkg[field]?.typescript);
+  });
+  if (pnp) {
+    console.error(`typescript-lsp: Yarn Plug\x27n\x27Play project at ${pnp} is not supported; falling back to TypeScript 7`);
+  } else if (declared) {
+    console.error("typescript-lsp: typescript is declared but not installed (run your package manager\x27s install); falling back to TypeScript 7");
+  }
+' "$PWD" "$stop")
 
 if [ -z "$found" ]; then
   exec npx -y -p typescript@7 tsc --lsp --stdio
@@ -29,4 +168,5 @@ if [ "$major" -ge 7 ]; then
   exec node "$package_dir/bin/tsc" --lsp --stdio
 fi
 
-exec npx -y typescript-language-server --stdio
+exec node "$lib/inject-tsserver-path.mjs" "$package_dir/lib/tsserver.js" \
+  npx -y typescript-language-server --stdio
