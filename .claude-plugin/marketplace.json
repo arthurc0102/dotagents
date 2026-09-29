@@ -155,6 +155,22 @@
       },
       "homepage": "https://github.com/mattpocock/skills",
       "category": "development"
+    },
+    {
+      "name": "herdr",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/herdrdev/herdr.git",
+        "path": "skills/herdr"
+      },
+      "description": "Control Herdr, a terminal multiplexer for coding agents: inspect and drive its workspaces, tabs, panes, commands, and other agents through the herdr CLI. Requires HERDR_ENV=1.",
+      "author": {
+        "name": "herdrdev",
+        "url": "https://github.com/herdrdev"
+      },
+      "homepage": "https://herdr.dev",
+      "category": "development",
+      "skills": ["./"]
     }
   ]
 }

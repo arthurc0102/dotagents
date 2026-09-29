@@ -47,6 +47,7 @@ Work in progress.
 | feature-dev       | Plugin       | Feature development workflow with agents for codebase exploration, architecture design, and quality review.        | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev)                | Apache-2.0 |
 | playground        | Plugin       | Interactive single-file HTML playgrounds with visual controls, live preview, and a copyable prompt.                | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playground)                 | Apache-2.0 |
 | mattpocock-skills | Plugin       | 27 engineering and productivity skills: grilling, spec/ticket flows, TDD, code review, domain modelling, and more. | [mattpocock/skills](https://github.com/mattpocock/skills)                                                                                | MIT        |
+| herdr             | Skill        | Inspect and control Herdr workspaces, tabs, panes, and agents through the `herdr` CLI. CLI only.                   | [herdrdev/herdr](https://github.com/herdrdev/herdr/tree/main/skills/herdr)                                                               | Apache-2.0 |
 
 ## Repo structure
 
@@ -60,6 +61,8 @@ plugins/
 Third-party plugins are referenced from their upstream repos in `marketplace.json` rather than copied here.
 
 The exception is `shuorenhua-zh-tw`, which points at the fork [arthurc0102/shuorenhua-zh-tw](https://github.com/arthurc0102/shuorenhua-zh-tw). Upstream ships only a root `SKILL.md` without `.claude-plugin/plugin.json`, and claude.ai (including Claude Code on the web) doesn't list plugins that lack one, so the fork adds that manifest and otherwise tracks upstream. Once upstream ships its own manifest, point the entry back at [tentenco/shuorenhua-zh-tw](https://github.com/tentenco/shuorenhua-zh-tw) and retire the fork.
+
+`herdr` has the same missing manifest but is referenced from upstream as is, so it shows up only in the Claude Code CLI. That's the only place it's needed, so it isn't worth forking.
 
 ## Adding a skill
 
