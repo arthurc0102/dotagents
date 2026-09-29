@@ -15,7 +15,8 @@ cd -P "${CLAUDE_PROJECT_DIR:-$PWD}"
 # .venv. A relative UV_PROJECT_ENVIRONMENT or a .venv is searched for at or
 # above the project directory, up to the git root (or only the project
 # directory outside a git repo) so an unrelated venv such as ~/.venv is never
-# picked up.
+# picked up. A submodule's root is its outermost superproject's, since that is
+# where a workspace keeps its venv.
 find_venv() {
   if [ -n "${VIRTUAL_ENV:-}" ] && [ -d "$VIRTUAL_ENV" ]; then
     venv=$VIRTUAL_ENV
@@ -37,6 +38,10 @@ find_venv() {
   fi
 
   stop=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+  while super=$(git -C "$stop" rev-parse --show-superproject-working-tree 2>/dev/null) &&
+    [ -n "$super" ]; do
+    stop=$super
+  done
   d=$PWD
   while :; do
     if [ -d "$d/$name" ]; then
