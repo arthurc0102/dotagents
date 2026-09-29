@@ -1,6 +1,6 @@
 {
   "ty": {
-    "command": "${CLAUDE_PLUGIN_ROOT}/bin/ty-lsp",
+    "command": "${CLAUDE_PLUGIN_ROOT}/scripts/ty-lsp",
     "extensionToLanguage": {
       ".py": "python",
       ".pyi": "python"

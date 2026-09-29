@@ -1,6 +1,6 @@
 {
   "typescript": {
-    "command": "${CLAUDE_PLUGIN_ROOT}/bin/typescript-lsp",
+    "command": "${CLAUDE_PLUGIN_ROOT}/scripts/typescript-lsp",
     "extensionToLanguage": {
       ".ts": "typescript",
       ".tsx": "typescriptreact",
