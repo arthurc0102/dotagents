@@ -1,7 +1,6 @@
 {
   "ty": {
-    "command": "uvx",
-    "args": ["ty", "server"],
+    "command": "${CLAUDE_PLUGIN_ROOT}/bin/ty-lsp",
     "extensionToLanguage": {
       ".py": "python",
       ".pyi": "python"

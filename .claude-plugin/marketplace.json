@@ -8,7 +8,7 @@
     {
       "name": "ty-lsp",
       "source": "./plugins/ty-lsp",
-      "description": "Python language server (ty) for type checking and code intelligence, run through uvx.",
+      "description": "Python language server (ty) for type checking and code intelligence: ty from the active or project virtual environment, then from PATH, falling back to uvx.",
       "category": "development"
     },
     {

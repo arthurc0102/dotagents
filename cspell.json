@@ -21,7 +21,9 @@
     "pocock",
     "prek",
     "shuorenhua",
-    "uvx"
+    "toplevel",
+    "uvx",
+    "venv"
   ],
   "overrides": [
     {

@@ -1,0 +1,64 @@
+#!/bin/sh
+# Start the ty language server, preferring the project's own ty:
+# - The ty installed in the virtual environment (see find_venv).
+# - `ty` already on PATH (e.g. a global install).
+# - Otherwise ty through uvx.
+# Whichever ty runs, point it at that virtual environment so it resolves the
+# packages installed there.
+set -eu
+
+# Resolve symlinks so $PWD compares equal to the path git prints.
+cd -P "${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# Find an existing virtual environment and store it in $venv, in order: the
+# activated one (VIRTUAL_ENV), UV_PROJECT_ENVIRONMENT when set, otherwise a
+# .venv. A relative UV_PROJECT_ENVIRONMENT or a .venv is searched for at or
+# above the project directory, up to the git root (or only the project
+# directory outside a git repo) so an unrelated venv such as ~/.venv is never
+# picked up.
+find_venv() {
+  if [ -n "${VIRTUAL_ENV:-}" ] && [ -d "$VIRTUAL_ENV" ]; then
+    venv=$VIRTUAL_ENV
+    return 0
+  fi
+
+  if [ -n "${UV_PROJECT_ENVIRONMENT:-}" ]; then
+    case $UV_PROJECT_ENVIRONMENT in
+      /*)
+        [ -d "$UV_PROJECT_ENVIRONMENT" ] || return 1
+        venv=$UV_PROJECT_ENVIRONMENT
+        return 0
+        ;;
+    esac
+    # uv resolves a relative path against the project or workspace root.
+    name=$UV_PROJECT_ENVIRONMENT
+  else
+    name=.venv
+  fi
+
+  stop=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+  d=$PWD
+  while :; do
+    if [ -d "$d/$name" ]; then
+      venv=$d/$name
+      return 0
+    fi
+    [ "$d" = "$stop" ] || [ "$d" = / ] && return 1
+    d=$(dirname "$d")
+  done
+}
+
+if find_venv; then
+  # ty looks for a .venv only in the project root, so a venv found elsewhere
+  # is missed without this.
+  export VIRTUAL_ENV="$venv"
+  if [ -x "$venv/bin/ty" ]; then
+    exec "$venv/bin/ty" server
+  fi
+fi
+
+if command -v ty >/dev/null 2>&1; then
+  exec ty server
+fi
+
+exec uvx ty server
