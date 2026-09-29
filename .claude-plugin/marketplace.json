@@ -75,15 +75,15 @@
       "name": "shuorenhua-zh-tw",
       "source": {
         "source": "github",
-        "repo": "tentenco/shuorenhua-zh-tw"
+        "repo": "arthurc0102/shuorenhua-zh-tw"
       },
       "description": "Clean AI-sounding patterns out of Traditional Chinese (Taiwan) text: remove AI tone, fix Mainland/Hong Kong terms and simplified-to-traditional conversion errors, and follow Taiwan punctuation and publishing conventions.",
       "author": {
-        "name": "tentenco",
+        "name": "Tenten",
+        "email": "dev@tenten.co",
         "url": "https://github.com/tentenco"
       },
-      "homepage": "https://github.com/tentenco/shuorenhua-zh-tw",
-      "skills": ["./"]
+      "homepage": "https://github.com/tentenco/shuorenhua-zh-tw"
     },
     {
       "name": "frontend-design",
