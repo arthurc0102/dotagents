@@ -1,5 +1,6 @@
 {
   "name": "typescript-lsp",
+  "displayName": "TypeScript LSP",
   "description": "TypeScript/JavaScript language server that follows the workspace's TypeScript version: the native tsc --lsp for TypeScript 7+, typescript-language-server for older versions.",
   "author": {
     "name": "Arthur Chang"
